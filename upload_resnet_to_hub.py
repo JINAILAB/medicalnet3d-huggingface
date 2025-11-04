@@ -22,7 +22,7 @@ import torch.nn as nn
 from transformers import AutoConfig, AutoModel
 from safetensors.torch import save_file
 
-from train.resnet_model.configuration_resnet import (
+from resnet_model.configuration_resnet import (
     ResNet3DConfig,
     ResNet3D10Config,
     ResNet3D50Config,
@@ -30,7 +30,7 @@ from train.resnet_model.configuration_resnet import (
     ResNet3D152Config,
     ResNet3D200Config,
 )
-from train.resnet_model.modeling_resnet import (
+from resnet_model.modeling_resnet import (
     ResNet3DModel,
     ResNet3DForImageClassification,
     ResNet3D10ForImageClassification,
@@ -368,7 +368,7 @@ If you use this code or pre-trained models, please cite the following:
 
 - Repository: https://github.com/Tencent/MedicalNet (original)
 - Unofficial Torch Hub Wrapper: https://github.com/Warvito/MedicalNet-models
-- Unofficial Huggingface Wrapper: https://github.com/JINAILAB/medicalnet3d-hugginface
+- Unofficial Huggingface Wrapper: https://github.com/JINAILAB/medicalnet3d-huggingface
 
 ---
 
@@ -497,8 +497,8 @@ def upload_model_to_hub(
     
     # Copy model code files (required for trust_remote_code)
     print(f"\n Copying model code files...")
-    source_config_file = "train/resnet_model/configuration_resnet.py"
-    source_modeling_file = "train/resnet_model/modeling_resnet.py"
+    source_config_file = "resnet_model/configuration_resnet.py"
+    source_modeling_file = "resnet_model/modeling_resnet.py"
     
     shutil.copy2(source_config_file, os.path.join(temp_dir, "configuration_resnet.py"))
     shutil.copy2(source_modeling_file, os.path.join(temp_dir, "modeling_resnet.py"))
