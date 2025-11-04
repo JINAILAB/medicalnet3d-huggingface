@@ -1,0 +1,10 @@
+[project]
+name = "medicalnet3d-hugginface"
+version = "0.1.0"
+description = "Unofficial Huggingface Wrapper for MedicalNet ResNet3D models"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.9.0",
+    "transformers>=4.57.1",
+]

@@ -48,6 +48,13 @@ To upload the models, you must log in first:
 huggingface-cli login
 ```
 
+#### init uv venv
+
+```bash
+uv init
+uv sync
+```
+
 #### Upload a Single Model
 
 ```bash
