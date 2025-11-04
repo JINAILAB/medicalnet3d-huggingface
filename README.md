@@ -51,8 +51,9 @@ huggingface-cli login
 #### init uv venv
 
 ```bash
-uv init
 uv sync
+uv venv
+source .venv/bin/activate
 ```
 
 #### Upload a Single Model
