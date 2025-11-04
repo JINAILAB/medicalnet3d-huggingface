@@ -1,14 +1,14 @@
 """
-MedicalNet ResNet3D 모델을 Hugging Face Hub에 업로드하는 스크립트
+Upload MedicalNet ResNet3D models to Hugging Face Hub
 
-사용법:
-    # 단일 모델 업로드
+Usage:
+    # Upload single model
     python upload_resnet_to_hub.py --model_variant resnet10 --model_name "your-username/medicalnet-resnet3d-10"
     
-    # 모든 모델 자동 업로드
+    # Upload all models automatically
     python upload_resnet_to_hub.py --upload_all --username "your-username"
 
-예시:
+Example:
     python upload_resnet_to_hub.py --model_variant resnet50 --model_name "myuser/medicalnet-resnet3d-50"
 """
 
@@ -45,7 +45,7 @@ from train.resnet_model.modeling_resnet import (
 MEDICALNET_MODELS = {
     "10": {
         "filename": "resnet_10.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_10.pth",
+        "local_path": "resnet_pth/resnet_10.pth",
         "config_class": ResNet3D10Config,
         "model_class": ResNet3D10ForImageClassification,
         "depths": [1, 1, 1, 1],
@@ -54,7 +54,7 @@ MEDICALNET_MODELS = {
     },
     "10-23datasets": {
         "filename": "resnet_10_23dataset.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_10_23dataset.pth",
+        "local_path": "resnet_pth/resnet_10_23dataset.pth",
         "config_class": ResNet3D10Config,
         "model_class": ResNet3D10ForImageClassification,
         "depths": [1, 1, 1, 1],
@@ -63,7 +63,7 @@ MEDICALNET_MODELS = {
     },
     "resnet50": {
         "filename": "resnet_50.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_50.pth",
+        "local_path": "resnet_pth/resnet_50.pth",
         "config_class": ResNet3D50Config,
         "model_class": ResNet3D50ForImageClassification,
         "depths": [3, 4, 6, 3],
@@ -72,7 +72,7 @@ MEDICALNET_MODELS = {
     },
     "50-23datasets": {
         "filename": "resnet_50_23dataset.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_50_23dataset.pth",
+        "local_path": "resnet_pth/resnet_50_23dataset.pth",
         "config_class": ResNet3D50Config,
         "model_class": ResNet3D50ForImageClassification,
         "depths": [3, 4, 6, 3],
@@ -81,7 +81,7 @@ MEDICALNET_MODELS = {
     },
     "101": {
         "filename": "resnet_101.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_101.pth",
+        "local_path": "resnet_pth/resnet_101.pth",
         "config_class": ResNet3D101Config,
         "model_class": ResNet3D101ForImageClassification,
         "depths": [3, 4, 23, 3],
@@ -90,7 +90,7 @@ MEDICALNET_MODELS = {
     },
     "152": {
         "filename": "resnet_152.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_152.pth",
+        "local_path": "resnet_pth/resnet_152.pth",
         "config_class": ResNet3D152Config,
         "model_class": ResNet3D152ForImageClassification,
         "depths": [3, 8, 36, 3],
@@ -99,7 +99,7 @@ MEDICALNET_MODELS = {
     },
     "200": {
         "filename": "resnet_200.pth",
-        "local_path": "/workspace/train/resnet_pth/resnet_200.pth",
+        "local_path": "resnet_pth/resnet_200.pth",
         "config_class": ResNet3D200Config,
         "model_class": ResNet3D200ForImageClassification,
         "depths": [3, 24, 36, 3],
@@ -110,20 +110,20 @@ MEDICALNET_MODELS = {
 
 
 def get_model_path(local_path: str) -> str:
-    """로컬 모델 파일 경로를 확인합니다."""
+    """Check local model file path"""
     if not os.path.exists(local_path):
-        raise FileNotFoundError(f"모델 파일을 찾을 수 없습니다: {local_path}")
+        raise FileNotFoundError(f"Model file not found: {local_path}")
     
     file_size_mb = os.path.getsize(local_path) / (1024 * 1024)
-    print(f"  ✅ 모델 파일 확인됨: {os.path.basename(local_path)} ({file_size_mb:.1f} MB)")
+    print(f"   Model file found: {os.path.basename(local_path)} ({file_size_mb:.1f} MB)")
     return local_path
 
 
 def convert_old_keys_to_new(old_state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
     """
-    기존 MedicalNet 모델의 키를 새로운 HuggingFace 스타일 키로 변환합니다.
+    Convert old MedicalNet model keys to new HuggingFace style keys
     
-    기존 구조:
+    Old structure:
     - conv1, bn1 -> resnet3d.embedder.embedder.convolution, normalization
     - maxpool -> resnet3d.embedder.pooler
     - layer1, layer2, layer3, layer4 -> resnet3d.encoder.stages[0-3]
@@ -213,48 +213,48 @@ def convert_old_keys_to_new(old_state_dict: Dict[str, torch.Tensor]) -> Dict[str
 _MODELS_REGISTERED = False
 
 def register_resnet3d_models():
-    """ResNet3D 모델을 AutoClass에 등록"""
+    """Register ResNet3D models to AutoClass"""
     global _MODELS_REGISTERED
     
     if _MODELS_REGISTERED:
         return
     
-    # AutoConfig에 등록
+    # Register AutoConfig
     AutoConfig.register("resnet3d", ResNet3DConfig)
     
-    # AutoModel에 등록
+    # Register AutoModel
     AutoModel.register(ResNet3DConfig, ResNet3DModel)
     
-    # AutoModelForImageClassification에 등록
+    # Register AutoModelForImageClassification
     from transformers import AutoModelForImageClassification
     AutoModelForImageClassification.register(ResNet3DConfig, ResNet3DForImageClassification)
     
     _MODELS_REGISTERED = True
-    print("✅ ResNet3D 모델이 AutoClass에 등록되었습니다.")
+    print(" ResNet3D models registered to AutoClass")
 
 
 def load_pretrained_weights(model, pth_file: str):
-    """사전 학습된 가중치를 모델에 로드하고 safetensors로 변환합니다."""
-    device = torch.device("cpu")  # CPU에서 로드하여 메모리 절약
+    """Load pretrained weights into model and convert to safetensors"""
+    device = torch.device("cpu")  # Load on CPU to save memory
     
-    print(f"  📥 PTH 파일 로드 중...")
+    print(f"  📥 Loading PTH file...")
     pretrained_state_dict = torch.load(pth_file, map_location=device)
     
-    # state_dict 키 정리
+    # Clean state_dict keys
     if "state_dict" in pretrained_state_dict:
         pretrained_state_dict = pretrained_state_dict["state_dict"]
     
-    # DataParallel wrapper 제거
+    # Remove DataParallel wrapper
     pretrained_state_dict = {k.replace("module.", ""): v for k, v in pretrained_state_dict.items()}
     
-    print(f"  🔄 키 변환 중 (기존 MedicalNet -> HuggingFace 스타일)...")
-    # 키 변환
+    print(f"  🔄 Converting keys (Original MedicalNet -> HuggingFace style)...")
+    # Convert keys
     converted_state_dict = convert_old_keys_to_new(pretrained_state_dict)
     
-    # 현재 모델의 state_dict 가져오기
+    # Get current model's state_dict
     model_state_dict = model.state_dict()
     
-    # 매칭되는 키만 로드
+    # Load only matching keys
     matched_keys = []
     mismatched_keys = []
     missing_keys = []
@@ -265,30 +265,30 @@ def load_pretrained_weights(model, pth_file: str):
                 matched_keys.append(key)
             else:
                 mismatched_keys.append(key)
-                print(f"     ⚠️  Shape 불일치: {key}")
-                print(f"        - 사전학습: {converted_state_dict[key].shape}")
-                print(f"        - 현재모델: {model_state_dict[key].shape}")
+                print(f"     - Shape mismatch: {key}")
+                print(f"     - Pretrained: {converted_state_dict[key].shape}")
+                print(f"     - Current model: {model_state_dict[key].shape}")
     
-    # 모델에만 있는 새 키 (분류 헤드 등)
+    # New keys only in model (classification head, etc.)
     for key in model_state_dict.keys():
         if key not in converted_state_dict:
             missing_keys.append(key)
     
-    # 매칭되는 가중치만 로드
+    # Load only matching weights
     filtered_state_dict = {k: v for k, v in converted_state_dict.items() if k in matched_keys}
     model.load_state_dict(filtered_state_dict, strict=False)
     
-    print(f"  ✅ 가중치 로드 완료:")
-    print(f"     - 로드된 레이어: {len(matched_keys)}개")
-    print(f"     - 새로 초기화된 레이어: {len(missing_keys)}개")
+    print(f"   Weights loaded successfully:")
+    print(f"     - Loaded layers: {len(matched_keys)}")
+    print(f"     - Newly initialized layers: {len(missing_keys)}")
     if mismatched_keys:
-        print(f"     - Shape 불일치로 제외: {len(mismatched_keys)}개")
+        print(f"     - Excluded due to shape mismatch: {len(mismatched_keys)}")
     
     if len(matched_keys) < 10:
-        print(f"\n  ⚠️  경고: 로드된 레이어가 매우 적습니다. 키 매핑을 확인하세요.")
-        print(f"  샘플 기존 키: {list(pretrained_state_dict.keys())[:3]}")
-        print(f"  샘플 변환 키: {list(converted_state_dict.keys())[:3]}")
-        print(f"  샘플 모델 키: {list(model_state_dict.keys())[:3]}")
+        print(f"\n   Warning: Loaded layers are very few. Check key mapping.")
+        print(f"  mple original keys: {list(pretrained_state_dict.keys())[:3]}")
+        print(f"   Sample converted keys: {list(converted_state_dict.keys())[:3]}")
+        print(f"   Sample model keys: {list(model_state_dict.keys())[:3]}")
     
     return model
 
@@ -298,33 +298,33 @@ def upload_model_to_hub(
     model_name: str,
     spatial_dims: int = 3,
     num_channels: int = 1,
-    num_labels: int = 400,  # MedicalNet의 기본 클래스 수
+    num_labels: int = 2,
 ):
     """
-    MedicalNet ResNet3D 모델을 Hugging Face Hub에 업로드
+    Upload MedicalNet ResNet3D model to Hugging Face Hub
     
     Args:
-        model_variant: 모델 변형 (예: 'resnet10', 'resnet50_23datasets')
-        model_name: Hub에 업로드할 모델 이름 (예: "username/medicalnet-resnet3d-10")
-        spatial_dims: 공간 차원 (3D 의료 영상이므로 3)
-        num_channels: 입력 채널 수
-        num_labels: 출력 클래스 수
+        model_variant: Model variant (e.g. 'resnet10', 'resnet50_23datasets')
+        model_name: Model name to upload to Hub (e.g. "username/medicalnet-resnet3d-10")
+        spatial_dims: Spatial dimensions (3D medical images so 3)
+        num_channels: Input channels
+        num_labels: Output classes
     """
     print("=" * 80)
-    print(f"MedicalNet {model_variant.upper()} 모델을 Hugging Face Hub에 업로드 중...")
+    print(f"Uploading MedicalNet {model_variant.upper()} model to Hugging Face Hub.")
     print("=" * 80)
     
     if model_variant not in MEDICALNET_MODELS:
-        raise ValueError(f"지원하지 않는 모델 변형: {model_variant}")
+        raise ValueError(f"Unsupported model variant: {model_variant}")
     
     model_info = MEDICALNET_MODELS[model_variant]
     
-    # 1. 로컬 모델 파일 확인
-    print(f"\n📂 로컬 모델 파일 확인 중...")
+    # Check local model file
+    print(f"\n Checking local model file...")
     pth_file = get_model_path(model_info["local_path"])
     
-    # 2. Configuration 생성
-    print(f"\n📋 Configuration 생성 중...")
+    # Create Configuration
+    print(f"\n Creating Configuration...")
     config_class = model_info["config_class"]
     config = config_class(
         spatial_dims=spatial_dims,
@@ -339,47 +339,40 @@ def upload_model_to_hub(
     print(f"  - Depths: {config.depths}")
     print(f"  - Layer Type: {config.layer_type}")
     
-    # 3. 모델 생성
-    print(f"\n🏗️  모델 생성 중...")
+    # Create model
+    print(f"\n  Creating model...")
     model_class = model_info["model_class"]
     model = model_class(config)
     
-    # 4. 사전 학습된 가중치 로드
-    print(f"\n⚙️  사전 학습된 가중치 로드 중...")
+    # Load pretrained weights
+    print(f"\n  Loading pretrained weights...")
     model = load_pretrained_weights(model, pth_file)
     
-    # 모델 파라미터 수 계산
-    total_params = sum(p.numel() for p in model.parameters())
-    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"\n📊 모델 통계:")
-    print(f"  - Total Parameters: {total_params:,}")
-    print(f"  - Trainable Parameters: {trainable_params:,}")
-    
-    # 5. 임시 디렉토리에 모델 저장 및 코드 파일 복사
-    print(f"\n💾 로컬에 모델 저장 중...")
+    # Save model to temporary directory and copy code files
+    print(f"\n Saving model to local directory...")
     temp_dir = f"./temp_{model_variant}"
     
-    # 임시 디렉토리가 있으면 삭제
+    # Delete temporary directory if it exists
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
     
-    # 모델과 설정 저장
+    # Save model and configuration
     model.save_pretrained(temp_dir, safe_serialization=True)
     config.save_pretrained(temp_dir)
-    print(f"  ✅ 모델 및 설정 저장 완료: {temp_dir}")
+    print(f"  Model and configuration saved successfully: {temp_dir}")
     
-    # 6. 모델 코드 파일 복사 (trust_remote_code를 위해 필수)
-    print(f"\n📋 모델 코드 파일 복사 중...")
+    # Copy model code files (required for trust_remote_code)
+    print(f"\n Copying model code files...")
     source_config_file = "train/resnet_model/configuration_resnet.py"
     source_modeling_file = "train/resnet_model/modeling_resnet.py"
     
     shutil.copy2(source_config_file, os.path.join(temp_dir, "configuration_resnet.py"))
     shutil.copy2(source_modeling_file, os.path.join(temp_dir, "modeling_resnet.py"))
-    print(f"  ✅ configuration_resnet.py 복사 완료")
-    print(f"  ✅ modeling_resnet.py 복사 완료")
+    print(f"  configuration_resnet.py copied successfully")
+    print(f"  modeling_resnet.py copied successfully")
     
-    # 7. Hub에 업로드
-    print(f"\n☁️  Hugging Face Hub에 업로드 중...")
+    # Upload to Hugging Face Hub
+    print(f"\n Uploading to Hugging Face Hub...")
     print(f"  - Model Name: {model_name}")
     print(f"  - Description: {model_info['description']}")
     print(f"  - Format: safetensors")
@@ -388,60 +381,48 @@ def upload_model_to_hub(
         from huggingface_hub import HfApi
         api = HfApi()
         
-        # 레포지토리 생성 (이미 있으면 무시)
-        print(f"\n  🔧 레포지토리 확인/생성 중...")
+        # Create repository (if it already exists, ignore)
+        print(f"\n Checking/creating repository...")
         try:
             api.create_repo(
                 repo_id=model_name,
                 repo_type="model",
-                exist_ok=True,  # 이미 있으면 무시
+                exist_ok=True,  # If it already exists, ignore
                 private=False
             )
-            print(f"  ✅ 레포지토리 준비 완료")
+            print(f"   Repository prepared successfully")
         except Exception as e:
-            print(f"  ⚠️  레포지토리 생성 경고: {e}")
-            print(f"  ℹ️  기존 레포지토리에 업로드 시도...")
+            print(f"   Repository creation warning: {e}")
+            print(f"   Trying to upload to existing repository...")
         
-        print(f"\n  📤 전체 폴더 업로드 중...")
+        print(f"\n Uploading entire folder...")
         api.upload_folder(
             folder_path=temp_dir,
             repo_id=model_name,
             repo_type="model",
             commit_message=f"Upload {model_variant} model with trust_remote_code support"
         )
-        print(f"  ✅ 업로드 완료")
+        print(f"   Upload completed")
         
-        # 8. 임시 디렉토리 삭제
-        print(f"\n🗑️  임시 파일 정리 중...")
+        # Delete temporary directory
+        print(f"\n Deleting temporary directory...")
         shutil.rmtree(temp_dir)
-        print(f"  ✅ 정리 완료")
+        print(f"   Temporary directory deleted")
         
         print(f"\n" + "=" * 80)
-        print(f"🎉 업로드 성공!")
-        print("=" * 80)
-        print(f"\n모델 사용 방법:")
-        print(f"```python")
-        print(f"from transformers import AutoConfig, AutoModelForImageClassification")
-        print(f"")
-        print(f"config = AutoConfig.from_pretrained('{model_name}', trust_remote_code=True)")
-        print(f"model = AutoModelForImageClassification.from_pretrained(")
-        print(f"    '{model_name}',")
-        print(f"    trust_remote_code=True")
-        print(f")")
-        print(f"```")
-        print(f"\nHub URL: https://huggingface.co/{model_name}")
+        print(f"Upload completed!")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ 업로드 실패: {e}")
-        print(f"\n💡 다음을 확인하세요:")
-        print(f"  1. Hugging Face에 로그인되어 있는지 확인")
-        print(f"     터미널에서 실행: huggingface-cli login")
-        print(f"  2. 모델 이름이 올바른 형식인지 확인 (username/model-name)")
-        print(f"  3. 네트워크 연결 상태 확인")
+        print(f"\n Upload failed: {e}")
+        print(f"\n Check the following:")
+        print(f"  1. Check if you are logged in to Hugging Face")
+        print(f"     Run in terminal: huggingface-cli login")
+        print(f"  2. Check if the model name is in the correct format (username/model-name)")
+        print(f"  3. Check network connection status")
         
-        # 에러 발생 시에도 임시 디렉토리 정리
+        # Delete temporary directory if error occurs
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
         
@@ -449,9 +430,9 @@ def upload_model_to_hub(
 
 
 def upload_all_models(username: str, num_labels: int = 400):
-    """모든 MedicalNet 모델을 Hub에 업로드"""
+    """Uploading all MedicalNet models to Hub"""
     print("\n" + "=" * 80)
-    print("모든 MedicalNet ResNet3D 모델을 업로드합니다")
+    print("Uploading all MedicalNet ResNet3D models")
     print("=" * 80)
     
     results = {}
@@ -468,15 +449,15 @@ def upload_all_models(username: str, num_labels: int = 400):
                 model_name=model_name,
                 num_labels=num_labels,
             )
-            results[variant_name] = "✅ 성공"
+            results[variant_name] = " 성공"
         except Exception as e:
             print(f"❌ {variant_name} 업로드 실패: {e}")
             results[variant_name] = f"❌ 실패: {str(e)[:50]}"
             continue
     
-    # 최종 결과 출력
+    # Print final results
     print("\n\n" + "=" * 80)
-    print("업로드 결과 요약")
+    print("Upload results summary")
     print("=" * 80)
     for variant, status in results.items():
         print(f"  {variant:25s} : {status}")
@@ -493,24 +474,24 @@ def main():
         "--model_variant",
         type=str,
         choices=list(MEDICALNET_MODELS.keys()),
-        help="업로드할 모델 변형 (예: 'resnet10', 'resnet50_23datasets')",
+        help="Model variant to upload (e.g. 'resnet10', 'resnet50_23datasets')",
     )
     parser.add_argument(
         "--model_name",
         type=str,
-        help="Hub에 업로드할 모델 이름 (예: 'username/medicalnet-resnet3d-10')",
+        help="Model name to upload to Hub (e.g. 'username/medicalnet-resnet3d-10')",
     )
     
     # 전체 모델 업로드 옵션
     parser.add_argument(
         "--upload_all",
         action="store_true",
-        help="모든 MedicalNet 모델을 자동으로 업로드",
+        help="Upload all MedicalNet models automatically",
     )
     parser.add_argument(
         "--username",
         type=str,
-        help="Hugging Face 사용자명 (--upload_all 사용 시 필수)",
+        help="Hugging Face username (--upload_all required)",
     )
     
     # 공통 옵션
@@ -518,32 +499,32 @@ def main():
         "--spatial_dims",
         type=int,
         default=3,
-        help="공간 차원 (기본값: 3)",
+        help="Spatial dimensions (default: 3)",
     )
     parser.add_argument(
         "--num_channels",
         type=int,
         default=1,
-        help="입력 채널 수 (기본값: 1)",
+        help="Input channels (default: 1)",
     )
     parser.add_argument(
         "--num_labels",
         type=int,
         default=400,
-        help="출력 클래스 수 (기본값: 400, MedicalNet 사전학습)",
+        help="Output classes (default: 400, MedicalNet pretrained)",
     )
     
     args = parser.parse_args()
     
     # 사용 가능한 모델 목록 출력
-    print("\n사용 가능한 MedicalNet 모델:")
+    print("\nAvailable MedicalNet models:")
     for variant, info in MEDICALNET_MODELS.items():
         print(f"  - {variant:25s} : {info['description']}")
     print()
     
     if args.upload_all:
         if not args.username:
-            parser.error("--upload_all을 사용할 때는 --username이 필수입니다")
+            parser.error("--upload_all requires --username")
         upload_all_models(args.username, args.num_labels)
     elif args.model_variant and args.model_name:
         upload_model_to_hub(
@@ -554,7 +535,7 @@ def main():
             num_labels=args.num_labels,
         )
     else:
-        parser.error("--model_variant와 --model_name을 함께 지정하거나, --upload_all과 --username을 지정해야 합니다")
+        parser.error("--model_variant and --model_name must be specified together, or --upload_all and --username must be specified")
 
 
 if __name__ == "__main__":

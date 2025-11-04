@@ -1,32 +1,16 @@
----
-library_name: transformers
-tags:
-- MedicalNet
-- medical images
-- medical
-- 3D
-- Med3D
-license: mit
-datasets:
-- TencentMedicalNet/MRBrains18
-language:
-- en
-base_model:
-- TencentMedicalNet/MedicalNet-Resnet10
-thumbnail: "https://github.com/Tencent/MedicalNet/blob/master/images/logo.png?raw=true"
+<img src="images/logo.png" align=mid />
 
----
-# MedicalNet for classifciation
+# MedicalNet for huggingface
 
 The MedicalNet project aggregated the dataset with diverse modalities, target organs, and pathologies to to build relatively large datasets. Based on this dataset, a series of 3D-ResNet pre-trained models and corresponding transfer-learning training code are provided. 
 
-This repository is an unofficial implementation of Tencent’s Med3D model ([Med3D: Transfer Learning for 3D Medical Image Analysis](https://arxiv.org/abs/1904.00625)), originally developed for 3d segmentation tasks.
+This repository is an unofficial implementation of Tencent's Med3D model ([Med3D: Transfer Learning for 3D Medical Image Analysis](https://arxiv.org/abs/1904.00625)), originally developed for 3d segmentation tasks.
 It has been adapted for classification tasks using the 3D-ResNet backbone and made compatible with the Hugging Face library.
 
 ---
 
 ## License
-MedicalNet is released under the MIT License (refer to the LICENSE file for detailso).
+MedicalNet is released under the MIT License (refer to the LICENSE file for details).
 
 ---
 
@@ -50,15 +34,49 @@ If you use this code or pre-trained models, please cite the following:
 
 ---
 
-## How to Get Started with the Model
+## Usage
+
+### 1. Download Pre-trained Models
+
+First, download the original MedicalNet model weights and store them in the `resnet_pth/`directory.
+
+### 2. Upload Models to Hugging Face Hub
+
+To upload the models, you must log in first:
+
+```bash
+huggingface-cli login
+```
+
+#### Upload a Single Model
+
+```bash
+uv run python upload_resnet_to_hub.py \
+    --model_variant resnet50 \
+    --model_name "your-username/medicalnet-resnet3d50" \
+```
+
+#### Upload All Models
+
+```bash
+uv run python upload_resnet_to_hub.py \
+    --upload_all \
+    --username "your-username" \
+```
+
+### 3. Use the Model from Hugging Face Hub
+
+To use the uploaded model:
 
 ```python
 from transformers import AutoConfig, AutoModelForImageClassification
 import torch
+
 config = AutoConfig.from_pretrained(
     'nwirandx/medicalnet-resnet3d50',
     trust_remote_code=True
 )
+
 # use a model from scratch
 # model = AutoModelForImageClassification.from_config(
 #     config,
@@ -70,8 +88,10 @@ model = AutoModelForImageClassification.from_pretrained(
     'nwirandx/medicalnet-resnet3d50',
     trust_remote_code=True
 )
+
 x = torch.randn(1, 1, 64, 64, 64)  # Example 3D volume
 outputs = model(x)
+print(outputs.logits.shape)  # (1, num_labels)
 ```
 
 ---
